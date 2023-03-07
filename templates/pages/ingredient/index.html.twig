@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Site - Recette Ingrédient{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1> Mes ingredient</h1>
+
+        <a href="{{ path('app_ingredient.new') }}" class="btn btn-primary mt-4 mb-4">Ajouter un ingrédient</a>
+
+         {# Message pour affiché la validation #}
+    	{% for message in app.flashes('success') %}
+			<div class="alert alert-success mt-4">
+				{{ message }}
+			</div>
+		{% endfor %}
+
+        {% if not ingredients.items is same as ([]) %}
+
+        <div class="count">
+            Il y a {{ ingredients.getTotalItemCount }} ingrédient au total
+        </div>
+        
+
+        <table class="table table-hover mt-4">
+            <thead>
+                <tr>
+                <th scope="col">Numéro</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Prix</th>
+                <th scope="col">Date de creation</th>
+                <th scope="col">Edition</th>
+                <th scope="col">Supprssion</th>
+                </tr>
+            </thead>
+            <tbody>
+            {# permet d'afficher tous les ingrédient en boucles dans 1 tableau#}
+            {% for ingredient in ingredients %}
+                <tr class="table-primary">
+                <th scope="row">{{ingredient.id}}</th>
+                <td>{{ingredient.name}}</td>
+                <td>{{ingredient.price}}</td>
+                <td>{{ingredient.createdAt | date('d/m/y')}}</td>
+                <td>
+                    <a href="{{path ('app_ingredient.edit',{id:ingredient.id}) }}" class="btn btn-info">Modifier</a>
+                </td>
+                <td>
+                    <a href="{{path ('app_ingredient.delete',{id:ingredient.id}) }}" class="btn btn-danger">Supprimer</a>
+                </td>
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+        {# permet d'affiché la pagination #}
+        <div class="navigation d-flex justify-content-center mt-4">
+            {{ knp_pagination_render(ingredients) }}
+        </div>
+        {% else %}
+        Il n'y a pas d'ingrédient
+        {% endif %}
+    </div>
+
+
+
+{% endblock %}

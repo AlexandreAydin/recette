@@ -76,10 +76,7 @@ class IngredientController extends AbstractController
             $manager->flush();       
 
             // Message pour affiché la validation 
-            $this->addFlash(
-                'success',
-                'Votre ingrédient a été créé avec succès!'
-            );
+          
 
             return $this->redirectToRoute('app_ingredient');
 
@@ -131,9 +128,6 @@ class IngredientController extends AbstractController
     #[Route('/ingredient/suppression/{id}', 'app_ingredient.delete', methods: ['GET'])]
     public function delete(EntityManagerInterface $manager, Ingredient $ingredient ) : Response 
     {
-        
-    
-
         $manager->remove($ingredient);
         $manager->flush();
 

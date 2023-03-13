@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Repository\IngredientRepository;
 use Doctrine\ORM\Mapping as ORM;
 use DateTimeImmutable;
+
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: IngredientRepository::class)]
@@ -19,7 +21,7 @@ class Ingredient
 
     #[ORM\Column(length: 50)]
     // on ne veu pas que la valeur sois nul 
-    #[Assert\NotNull()]
+    #[Assert\NotBlank()]
     //permet de metrre min 2 max 50
     #[Assert\Length(min: 2, max: 50)]
     private ?string $name = null;
@@ -83,5 +85,11 @@ class Ingredient
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    //Pour enlevé l'erreur object of class App\Entity\Ingredient could not be converted to string
+    public function __toString()
+    {
+        return $this->name;
     }
 }

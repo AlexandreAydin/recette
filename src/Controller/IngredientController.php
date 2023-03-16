@@ -30,11 +30,14 @@ class IngredientController extends AbstractController
      */    
 
     #[Route('/ingredient', name: 'app_ingredient', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function index(IngredientRepository $repository, PaginatorInterface $paginator, Request $request): Response
     {
         $ingredients = $paginator->paginate(
             // permet d'appeler tout les ingrédient qui sont dans la base de données
-            $repository ->findAll(),
+                 // $repository ->findAll(),
+            //Permet d'appeler uniquement les ingrédients que l'utilisateur a crée
+            $repository ->findBy( ['user' => $this ->getUser()]),
             $request->query->getInt('page', 1), /*Numéro de page*/
             10 /*limit par page*/
         );
@@ -55,6 +58,7 @@ class IngredientController extends AbstractController
      * @return Response
      */
     #[Route('/ingredient/nouveau', name: 'app_ingredient.new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function new(
         Request $request,
         EntityManagerInterface $manager
@@ -71,6 +75,8 @@ class IngredientController extends AbstractController
         if($form->isSubmitted() && $form->isValid()){
             // Enregistre Le formulaire dans labase de donnéé
             $ingredient = $form->getData();
+            //permet de attaché l'ingrédient à l'utilisateur qui la crée
+            $ingredient->setUser($this->getUser());
 
             $manager->persist($ingredient);
             $manager->flush();       
@@ -89,8 +95,9 @@ class IngredientController extends AbstractController
     }
 
 
-
+    // #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     #[Route('/ingredient/edition/{id}', 'app_ingredient.edit', methods: ['GET' , 'POST'])]
+
     public function edit(
         Ingredient $ingredient,
         Request $request,
@@ -125,6 +132,7 @@ class IngredientController extends AbstractController
         ]);
     }
 
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     #[Route('/ingredient/suppression/{id}', 'app_ingredient.delete', methods: ['GET'])]
     public function delete(EntityManagerInterface $manager, Ingredient $ingredient ) : Response 
     {

@@ -32,6 +32,7 @@ class RecipeController extends AbstractController
      * @param Request $request
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/recette', name: 'app_recipe', methods:['GET'])]
     public function index(RecipeRepository $repository,
         PaginatorInterface $paginator,
@@ -41,7 +42,9 @@ class RecipeController extends AbstractController
 
         $recipes = $paginator->paginate(
             // permet d'appeler tout les ingrédient qui sont dans la base de données
-            $repository ->findAll(),
+                // $repository ->findAll(),
+             //Permet d'appeler uniquement les recettes que l'utilisateur a crée
+             $repository ->findBy( ['user' => $this ->getUser()]),
             $request->query->getInt('page', 1), /*Numéro de page*/
             10 /*limit par page*/
         );
@@ -60,6 +63,7 @@ class RecipeController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
+    #[IsGranted('ROLE_USER')]
     #[Route('/recette/creation','app_recipe.new', methods:['GET','POST'] )]
     public function new(Request $request, EntityManagerInterface $manager): Response
     {
@@ -69,6 +73,8 @@ class RecipeController extends AbstractController
         $form->handleRequest($request); 
         if ($form->isSubmitted()&& $form->isValid()){
             $recipe = $form->getData(); 
+            //permet de attaché l'ingrédient à l'utilisateur qui la crée
+            $recipe->setUser($this->getUser());
 
             $manager->persist($recipe);
             $manager->flush();
@@ -96,6 +102,7 @@ class RecipeController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
+    #[Security("is_granted('ROLE_USER') and user === recip.getUser()")]
     #[Route('/recette/edition/{id}', 'app_recette.edit', methods: ['GET' , 'POST'])]
     public function edit(
         Recipe $recette,
@@ -132,7 +139,7 @@ class RecipeController extends AbstractController
 
 
     }
-
+    #[Security("is_granted('ROLE_USER') and user === recip.getUser()")]
     #[Route('/recette/suppression/{id}', 'app_recipe.delete', methods: ['GET'])]
     public function delete(EntityManagerInterface $manager, Recipe $recette ) : Response 
     {

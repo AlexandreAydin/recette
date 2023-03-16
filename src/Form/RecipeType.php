@@ -25,6 +25,14 @@ use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class RecipeType extends AbstractType
 {
+    private $token;
+
+    public function __construct(TokenStorageInterface $token)
+    {
+        $this->token = $token;
+    }
+
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -134,23 +142,22 @@ class RecipeType extends AbstractType
                     new Assert\NotNull()
                 ]
             ])
-
             ->add('ingredients', EntityType::class, [
-                'class' => ingredient::class,
+                'class' => Ingredient::class,
                 'query_builder' => function (IngredientRepository $r) {
                     return $r->createQueryBuilder('i')
-                        // ->where('i.user = :user')
-                        ->orderBy('i.name', 'ASC');
-                        // ->setParameter('user', $this->token->getToken()->getUser());
+                        ->where('i.user = :user')
+                        ->orderBy('i.name', 'ASC')
+                        ->setParameter('user', $this->token->getToken()->getUser());
                 },
-                'label' => 'Les ingrédients ',
+                'label' => 'Les ingrédients',
                 'label_attr' => [
-                    'class' => 'form-check-label'
+                    'class' => 'form-label mt-4'
                 ],
                 'choice_label' => 'name',
                 'multiple' => true,
                 'expanded' => true,
-            ])
+            ])          
             ->add('submit', SubmitType::class, [
                 'attr' => [
                     'class' => 'btn btn-primary mt-4'
@@ -167,3 +174,5 @@ class RecipeType extends AbstractType
         ]);
     }
 }
+
+

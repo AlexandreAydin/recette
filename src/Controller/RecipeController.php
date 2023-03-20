@@ -55,6 +55,90 @@ class RecipeController extends AbstractController
         ]);
     }
 
+    #[Route('/recette/communaute',name:'app_recipe.index.public', methods:['GET'])]
+    public function indexPublic(
+        RecipeRepository $repository,
+        PaginatorInterface $paginator,
+        Request $request,
+        // Recipe $recipes
+
+    ): Reponse 
+    {
+
+        $recipes = $paginator->paginate(
+            $repository->findPublicRecipe(null),
+            $request->query->getInt('page', 1),
+            10
+        );
+
+    
+         return $this->render('pages/recipe/community.html.twig', [
+            'recipes' => $recipes
+        ]);
+
+    }
+
+
+
+      /**
+     * This Controller allow us to see a recipe id this a one is public
+     *
+     * @param Recipe $recipe
+     * @return Response
+     */
+    #[Security("is_granted('ROLE_USER') and recipe.isIsPublic() === true")]
+    #[Route('/recette/{id}', name:'app_recipe.show', methods: ['GET', 'POST'] )]
+    public function show(Recipe $recipe, 
+    Request $request,
+    MarkRepository $markRepository,
+    EntityManagerInterface $manager
+    ) : Response
+    {
+        $mark= new Mark();
+        $form = $this->createForm(MarkType::class, $mark);
+        
+        $form->handleRequest($request);
+        if($form->isSubmitted() && $form->isValid()){
+            // on prend l'utilisateur courents 
+            $mark->setUser($this->getUser())
+                //on prend la recette courent
+                ->setRecipe($recipe);
+
+
+
+            // un utilisateur ne peu pas voter 2 fois 
+            $existingMark = $markRepository->findOneBy([
+                'user'=>$this->getUser(),
+                'recipe'=>$recipe
+            ]);
+
+            //si l'utilisateur n'a pas déja voté il peu voté 
+            if(!$existingMark){
+                $manager->persist ($mark);
+            }else {
+                // Il peu modifier sa note
+                $existingMark->setMark(
+                    $form->getData()->getMark()
+                );
+
+            }
+
+            $manager->flush();
+
+            $this->addFlash(
+                'success',
+                'Votre note a bien été prise en compte'
+            );
+            return $this->redirectToRoute('app_recipe.show', ['id'=> $recipe->getId()]);
+        }
+
+        return $this->render('pages/recipe/show.html.twig',[
+            "recipe"=>$recipe,
+            "form"=>$form->createView()
+        ]);
+    }
+
+
 
     /**
      * Permet d'ajouter une nouvelle recette 

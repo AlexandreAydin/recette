@@ -55,24 +55,29 @@ class RecipeController extends AbstractController
         ]);
     }
 
-    #[Route('/recette/communaute',name:'app_recipe.index.public', methods:['GET'])]
+
+
+
+    #[Route('/recette/communaute', 'app_recipe.community', methods: ['GET'])]
     public function indexPublic(
         RecipeRepository $repository,
         PaginatorInterface $paginator,
-        Request $request,
-        // Recipe $recipes
-
-    ): Reponse 
-    {
+        Request $request
+    ): Response {
+        $cache = new FilesystemAdapter();
+        $data = $cache->get('recipes', function (ItemInterface $item) use ($repository) {
+            $item->expiresAfter(15);
+            return $repository->findPublicRecipe(null);
+        });
 
         $recipes = $paginator->paginate(
-            $repository->findPublicRecipe(null),
+            $data,
             $request->query->getInt('page', 1),
             10
         );
 
-    
-         return $this->render('pages/recipe/community.html.twig', [
+        
+        return $this->render('pages/recipe/community.html.twig', [
             'recipes' => $recipes
         ]);
 
@@ -86,9 +91,10 @@ class RecipeController extends AbstractController
      * @param Recipe $recipe
      * @return Response
      */
-    #[Security("is_granted('ROLE_USER') and recipe.isIsPublic() === true")]
+    #[Security("is_granted('ROLE_USER') and recipe.isIsPublic() === true || user === recipe.getUser()")]
     #[Route('/recette/{id}', name:'app_recipe.show', methods: ['GET', 'POST'] )]
-    public function show(Recipe $recipe, 
+    public function show(
+    Recipe $recipe, 
     Request $request,
     MarkRepository $markRepository,
     EntityManagerInterface $manager
@@ -148,8 +154,13 @@ class RecipeController extends AbstractController
      * @return Response
      */
     #[IsGranted('ROLE_USER')]
-    #[Route('/recette/creation','app_recipe.new', methods:['GET','POST'] )]
-    public function new(Request $request, EntityManagerInterface $manager): Response
+    #[Route('/recette_creation','app_recipe.new', methods:['GET','POST'] )]
+    
+    public function new(
+    Request $request,
+    RecipeRepository $repository,
+    EntityManagerInterface $manager
+    ): Response
     {
         $recipe = new Recipe();
         $form=$this->createForm(RecipeType::class, $recipe);
@@ -157,7 +168,8 @@ class RecipeController extends AbstractController
         $form->handleRequest($request); 
         if ($form->isSubmitted()&& $form->isValid()){
             $recipe = $form->getData(); 
-            //permet de attaché l'ingrédient à l'utilisateur qui la crée
+       
+            //permet de attaché la recette à l'utilisateur qui la crée
             $recipe->setUser($this->getUser());
 
             $manager->persist($recipe);
@@ -186,10 +198,10 @@ class RecipeController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[Security("is_granted('ROLE_USER') and user === recip.getUser()")]
-    #[Route('/recette/edition/{id}', 'app_recette.edit', methods: ['GET' , 'POST'])]
+    #[Security("is_granted('ROLE_USER') and user === recipe.getUser()")]
+    #[Route('/recette/edition/{id}', 'app_recipe.edit', methods: ['GET' , 'POST'])]
     public function edit(
-        Recipe $recette,
+        Recipe $recipe,
         Request $request,
         EntityManagerInterface $manager
         ) : Response 
@@ -197,15 +209,15 @@ class RecipeController extends AbstractController
 
         // permet de récupéré recette par id (paramconverter symfony permet de récuperer le id sans passer par repository )
         // Permet de récupéré Formulaire qui se trouve dans Recette
-        $form= $this->createForm(RecipeType::class, $recette);
+        $form= $this->createForm(RecipeType::class, $recipe);
 
         $form->handleRequest($request);
         //si la formulaire a était soumit et valid 
         if($form->isSubmitted() && $form->isValid()){
             // Enregistre Le formulaire dans labase de donnéé
-            $recette = $form->getData();
+            $recipe = $form->getData();
 
-            $manager->persist($recette);
+            $manager->persist($recipe);
             $manager->flush();       
 
             // Message pour affiché la validation 
@@ -223,11 +235,12 @@ class RecipeController extends AbstractController
 
 
     }
-    #[Security("is_granted('ROLE_USER') and user === recip.getUser()")]
+
+    #[Security("is_granted('ROLE_USER') and user === recipe.getUser()")]
     #[Route('/recette/suppression/{id}', 'app_recipe.delete', methods: ['GET'])]
-    public function delete(EntityManagerInterface $manager, Recipe $recette ) : Response 
+    public function delete(EntityManagerInterface $manager, Recipe $recipe ) : Response 
     {
-        $manager->remove($recette);
+        $manager->remove($recipe);
         $manager->flush();
 
         $this->addFlash(
@@ -237,8 +250,6 @@ class RecipeController extends AbstractController
 
         return $this->redirectToRoute('app_recipe');
     }
-
-
 
 
 }

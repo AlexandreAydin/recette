@@ -20,15 +20,14 @@
 		{% endfor %}
 
 		<h1 class="mt-4">{{ recipe.name }}</h1>
-		<p>La moyenne de la recette est de {{recipe.average|number_format(2, '.', ',')}}/5</p>
 
-		{# <div class="recipe__image">
+		<div class="recipe__image">
 			<img style="max-width: 500px;" src="{{ vich_uploader_asset(recipe, 'imageFile') }}">
-		</div> #}
+		</div>
  
-		{# <p>La moyenne de cette recette est de
+		<p>La moyenne de cette recette est de
 			{{ recipe.average|number_format(2, '.', ',') }}
-			/5</p> #}
+			/5</p>
 
 		<div> 
 			<span class="badge bg-primary">Créée le
@@ -42,7 +41,7 @@
 			{% else %}
 				<p>Temps non renseigné</p>
 			{% endif %}
-		</div> #}
+		</div>  #}
 
 		<div class="mt-4">
 			{% if recipe.time %}

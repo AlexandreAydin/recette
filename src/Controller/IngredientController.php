@@ -57,7 +57,7 @@ class IngredientController extends AbstractController
      * @param EntityManagerInterface $manager
      * @return Response
      */
-    #[Route('/ingredient/nouveau', name: 'app_ingredient.new', methods: ['GET', 'POST'])]
+    #[Route('/ingredient/creation', name: 'app_ingredient.new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_USER')]
     public function new(
         Request $request,
@@ -80,8 +80,6 @@ class IngredientController extends AbstractController
 
             $manager->persist($ingredient);
             $manager->flush();       
-
-            // Message pour affiché la validation 
           
 
             return $this->redirectToRoute('app_ingredient');
@@ -94,8 +92,8 @@ class IngredientController extends AbstractController
        ]);
     }
 
-
-    // #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
+    // si l'utilisateur est connecté et l'ingrédients appartient à l'utilisateur donc on peu modifier
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
     #[Route('/ingredient/edition/{id}', 'app_ingredient.edit', methods: ['GET' , 'POST'])]
 
     public function edit(

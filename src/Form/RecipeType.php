@@ -138,6 +138,19 @@ class RecipeType extends AbstractType
                     new Assert\NotNull()
                 ]
             ])
+            ->add('isPublic', CheckboxType::class, [
+                'attr' => [
+                    'class' => 'form-check-input',
+                ],
+                'required' => false,
+                'label' => 'Affiché à la communauté ? ',
+                'label_attr' => [
+                    'class' => 'form-check-label'
+                ],
+                'constraints' => [
+                    new Assert\NotNull()
+                ]
+            ])
             ->add('imageFile', VichImageType::class, [
                 'label' => 'Image de la recette',
                 'label_attr' => [

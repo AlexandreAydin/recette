@@ -76,7 +76,6 @@ class RecipeController extends AbstractController
             10
         );
 
-        
         return $this->render('pages/recipe/community.html.twig', [
             'recipes' => $recipes
         ]);

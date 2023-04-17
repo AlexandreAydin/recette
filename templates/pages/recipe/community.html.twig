@@ -23,6 +23,10 @@
 			</div>
 
 
+		<div class="navigation d-flex justify-content-center mt-4">
+				{{ knp_pagination_render(recipes) }}
+			</div>
+
 		{% else %}
 			<h4>Il n'y a pas de recettes</h4>
 		{% endif %}

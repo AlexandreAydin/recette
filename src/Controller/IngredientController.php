@@ -119,8 +119,10 @@ class IngredientController extends AbstractController
             // Message pour affiché la validation 
             $this->addFlash(
                 'success',
-                'Votre ingrédient a été modifié avec succès!'
+                'Votre ingrédient a été modifié avec succès !'
             );
+
+
 
             return $this->redirectToRoute('app_ingredient');
     }
@@ -139,7 +141,7 @@ class IngredientController extends AbstractController
 
         $this->addFlash(
             'success',
-            'Votre ingrédient a été supprimé avec succès!'
+            'Votre ingrédient a été supprimé avec succès !'
         );
 
         return $this->redirectToRoute('app_ingredient');

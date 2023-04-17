@@ -45,9 +45,9 @@ class RecipeRepository extends ServiceEntityRepository
      * @param integer $nbRecipes
      * @return array
      */
-    public function findPublicRecipe(?int $nbRecipes): array
+    public function findPublicRecipe(?int $nbRecipes,$orderBy = 'DESC'): array
     {
-        sleep(3);
+    
         $queryBuilder = $this->createQueryBuilder('r')
             ->where('r.isPublic = 1')
             ->orderBy('r.createdAt', 'DESC');

@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
+use DateTime;
 
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -118,7 +119,6 @@ class Recipe
     {
         $this->updatedAt = new \DateTimeImmutable();
     }
-
 
 
     public function getId(): ?int
@@ -271,17 +271,19 @@ class Recipe
         return $this;
     }
 
-    public function getUpdateAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->UpdateAt;
+        return $this->UpdatedAt;
     }
 
-    public function setUpdateAt(\DateTimeImmutable $UpdateAt): self
+    public function setUpdatedAt(\DateTimeImmutable $UpdatedAt): self
     {
-        $this->UpdateAt = $UpdateAt;
+        $this->UpdatedAt = $UpdatedAt;
 
         return $this;
     }
+
+   
 
     /**
      * @return Collection<int, Ingredient>
